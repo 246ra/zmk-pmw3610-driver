@@ -793,10 +793,8 @@ static int pmw3610_report_data(const struct device *dev) {
             }
         } else if (input_mode == BALL_ACTION && !is_ball_action) {
             if(ball_action_idx != -1) {
-                if(idx != -1) {
-                    data->ball_action_delta_x = 0;
-                    data->ball_action_delta_y = 0;
-                }
+                data->ball_action_delta_x = 0;
+                data->ball_action_delta_y = 0;
             }
         }
     } else {
