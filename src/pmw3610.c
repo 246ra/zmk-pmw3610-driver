@@ -786,7 +786,7 @@ static int pmw3610_report_data(const struct device *dev) {
                 int idx = -1;
                 if(abs(data->ball_action_delta_x) > action_cfg.tick && abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
                     idx = data->ball_action_delta_x > 0 ? 0 : 1;
-                } else if(abs(data->ball_action_delta_y) > action_cfg.tick && abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y) {
+                } else if(abs(data->ball_action_delta_y) > action_cfg.tick && abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
                     idx = data->ball_action_delta_y > 0 ? 3 : 2;
                 }
 
