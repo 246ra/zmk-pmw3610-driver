@@ -754,7 +754,7 @@ static int pmw3610_report_data(const struct device *dev) {
         } else if (input_mode == BALL_ACTION && is_ball_action) {
             // ボールアクションディレイ用
             curr_ball_time = k_uptime_get();
-            is_ball_action = false;
+            is_ball_action = true;
             
             data->ball_action_delta_x += x;
             data->ball_action_delta_y += y;
