@@ -756,13 +756,13 @@ static int pmw3610_report_data(const struct device *dev) {
                 data->scroll_delta_y = 0;
             }
         } else if (input_mode == BALL_ACTION) {
-            // ボールアクションディレイ用
-            curr_ball_time = k_uptime_get();
+            data->ball_action_delta_x += x;
+            data->ball_action_delta_y += y;
 
+            // ボールアクションディレイ用
             if (is_ball_action) {
+            　　curr_ball_time = k_uptime_get();
                 is_ball_action = false;
-                data->ball_action_delta_x += x;
-                data->ball_action_delta_y += y;
 
                 const struct pixart_config *config = dev->config;
     
