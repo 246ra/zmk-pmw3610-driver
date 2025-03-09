@@ -722,6 +722,9 @@ static int pmw3610_report_data(const struct device *dev) {
     }
 #endif
 
+    // ボールアクション初期化
+    is_ball_action = true;
+    
     if (x != 0 || y != 0) {
         if (input_mode == MOVE || input_mode == SNIPE) {
 #if AUTOMOUSE_LAYER > 0
