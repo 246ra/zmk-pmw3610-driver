@@ -791,11 +791,11 @@ static int pmw3610_report_data(const struct device *dev) {
                     data->ball_action_delta_y = 0;
                 }
             }
-        } else if (input_mode == BALL_ACTION && !is_ball_action) {
-            if(ball_action_idx != -1) {
-                data->ball_action_delta_x = 0;
-                data->ball_action_delta_y = 0;
-            }
+        //} else if (input_mode == BALL_ACTION && !is_ball_action) {
+        //    if(ball_action_idx != -1) {
+        //        data->ball_action_delta_x = 0;
+        //        data->ball_action_delta_y = 0;
+        //    }
         }
     } else {
         if (!is_ball_action && k_uptime_get() - curr_ball_time > ball_action_delta_time) {
