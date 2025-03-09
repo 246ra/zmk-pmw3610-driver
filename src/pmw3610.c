@@ -784,12 +784,19 @@ static int pmw3610_report_data(const struct device *dev) {
                 // ボールの動き(上下左右)を判定。tickを満たしていない場合NONE(-1)になる。
                 // 0>right, 1>left, 2>up, 3>down
                 int idx = -1;
-                if(abs(data->ball_action_delta_x) > action_cfg.tick && abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
+                //if(abs(data->ball_action_delta_x) > action_cfg.tick && abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
+                //    idx = data->ball_action_delta_x > 0 ? 0 : 1;
+                //} else if(abs(data->ball_action_delta_y) > action_cfg.tick && abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
+                //    idx = data->ball_action_delta_y > 0 ? 3 : 2;
+                //}
+
+                if(abs(data->ball_action_delta_x) > action_cfg.tick) {
                     idx = data->ball_action_delta_x > 0 ? 0 : 1;
-                } else if(abs(data->ball_action_delta_y) > action_cfg.tick && abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
+                } else if(abs(data->ball_action_delta_y) > action_cfg.tick) {
                     idx = data->ball_action_delta_y > 0 ? 3 : 2;
                 }
 
+                
                 if(idx != -1 && is_ball_action) {
                     is_ball_action = false;
                     zmk_behavior_queue_add(&event, action_cfg.bindings[idx], true, action_cfg.tap_ms);
