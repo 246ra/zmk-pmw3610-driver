@@ -600,7 +600,6 @@ static enum pixart_input_mode get_input_mode_for_current_layer(const struct devi
 
 // ボールアクションを一瞬だけ許可(疑似クリック)
 static int64_t curr_ball_time = 0;
-//static int64_t ball_action_delta_time = 200;
 static bool is_ball_action = true;
 
 static int pmw3610_report_data(const struct device *dev) {
@@ -756,7 +755,6 @@ static int pmw3610_report_data(const struct device *dev) {
                 data->scroll_delta_x = 0;
                 data->scroll_delta_y = 0;
             }
-        //} else if (input_mode == BALL_ACTION && is_ball_action) {
         } else if (input_mode == BALL_ACTION) {
             // ボールアクションディレイ用
             curr_ball_time = k_uptime_get();
@@ -766,7 +764,8 @@ static int pmw3610_report_data(const struct device *dev) {
 
             const struct pixart_config *config = dev->config;
 
-            if(ball_action_idx != -1) {
+            if(ball_action_idx != -1 && is_ball_action) {
+                is_ball_action = false;
                 const struct ball_action_cfg action_cfg = *config->ball_actions[ball_action_idx];
 
                 LOG_DBG("invoking ball action [%d], layer=%d", ball_action_idx, zmk_keymap_highest_layer_active());
@@ -784,21 +783,15 @@ static int pmw3610_report_data(const struct device *dev) {
                 // ボールの動き(上下左右)を判定。tickを満たしていない場合NONE(-1)になる。
                 // 0>right, 1>left, 2>up, 3>down
                 int idx = -1;
-                //if(abs(data->ball_action_delta_x) > action_cfg.tick && abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
-                //    idx = data->ball_action_delta_x > 0 ? 0 : 1;
-                //} else if(abs(data->ball_action_delta_y) > action_cfg.tick && abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
-                //    idx = data->ball_action_delta_y > 0 ? 3 : 2;
-                //}
-
-                if(abs(data->ball_action_delta_x) > action_cfg.tick) {
+                if(abs(data->ball_action_delta_x) > action_cfg.tick && abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
                     idx = data->ball_action_delta_x > 0 ? 0 : 1;
-                } else if(abs(data->ball_action_delta_y) > action_cfg.tick) {
+                } else if(abs(data->ball_action_delta_y) > action_cfg.tick && abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
                     idx = data->ball_action_delta_y > 0 ? 3 : 2;
                 }
 
-                
-                if(idx != -1 && is_ball_action) {
-                    is_ball_action = false;
+                //if(idx != -1 && is_ball_action) {
+                //    is_ball_action = false;
+                if(idx != -1) {
                     zmk_behavior_queue_add(&event, action_cfg.bindings[idx], true, action_cfg.tap_ms);
                     zmk_behavior_queue_add(&event, action_cfg.bindings[idx], false, action_cfg.wait_ms);
 
