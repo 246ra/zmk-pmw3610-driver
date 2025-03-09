@@ -798,8 +798,8 @@ static int pmw3610_report_data(const struct device *dev) {
             }
         }
     } else {
-        if (!is_ball_action && k_uptime_delta(curr_ball_time) > ball_action_delta_time) {
-            is_ballk_action = true;
+        if (!is_ball_action && k_uptime_get() - curr_ball_time > ball_action_delta_time) {
+            is_ball_action = true;
         }
     }
 
