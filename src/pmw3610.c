@@ -754,7 +754,7 @@ static int pmw3610_report_data(const struct device *dev) {
         } else if (input_mode == BALL_ACTION && is_ball_action) {
             // ボールアクションディレイ用
             curr_ball_time = k_uptime_get();
-            is_ball_action = true;
+            is_ball_action = false;
             
             data->ball_action_delta_x += x;
             data->ball_action_delta_y += y;
@@ -798,7 +798,8 @@ static int pmw3610_report_data(const struct device *dev) {
         //    }
         }
     } else {
-        if (!is_ball_action && k_uptime_get() - curr_ball_time > ball_action_delta_time) {
+        //if (!is_ball_action && k_uptime_get() - curr_ball_time > ball_action_delta_time) {
+        if (!is_ball_action) {
             is_ball_action = true;
         }
     }
