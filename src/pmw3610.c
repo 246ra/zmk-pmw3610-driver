@@ -723,10 +723,10 @@ static int pmw3610_report_data(const struct device *dev) {
 #endif
 
     // ボールアクション初期化
-    if (!is_ball_action) {
+    if (!is_ball_action && k_uptime_get() - curr_ball_time > ball_action_delta_time) {
         is_ball_action = true;
     }
-    
+
     if (x != 0 || y != 0) {
         if (input_mode == MOVE || input_mode == SNIPE) {
 #if AUTOMOUSE_LAYER > 0
@@ -802,12 +802,7 @@ static int pmw3610_report_data(const struct device *dev) {
         //        data->ball_action_delta_y = 0;
         //    }
         }
-    } else {
-        //if (!is_ball_action && k_uptime_get() - curr_ball_time > ball_action_delta_time) {
-        //    is_ball_action = true;
-        //}
     }
-
     return err;
 }
 
