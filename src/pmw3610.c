@@ -722,10 +722,10 @@ static int pmw3610_report_data(const struct device *dev) {
 #endif
 
     // ボールアクション初期化
-    if (!is_ball_action && k_uptime_get() - curr_ball_time >= CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
-        is_ball_action = true;
-    }
-
+    //if (!is_ball_action && k_uptime_get() - curr_ball_time >= CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
+    //    is_ball_action = true;
+    //}
+    
     if (x != 0 || y != 0) {
         if (input_mode == MOVE || input_mode == SNIPE) {
 #if AUTOMOUSE_LAYER > 0
@@ -755,17 +755,17 @@ static int pmw3610_report_data(const struct device *dev) {
                 data->scroll_delta_x = 0;
                 data->scroll_delta_y = 0;
             }
-        } else if (input_mode == BALL_ACTION) {
+        } else if (input_mode == BALL_ACTION && is_ball_action) {
             // ボールアクションディレイ用
             curr_ball_time = k_uptime_get();
+            is_ball_action = fales;
             
             data->ball_action_delta_x += x;
             data->ball_action_delta_y += y;
 
             const struct pixart_config *config = dev->config;
 
-            if(ball_action_idx != -1 && is_ball_action) {
-                is_ball_action = false;
+            if(ball_action_idx != -1) {
                 const struct ball_action_cfg action_cfg = *config->ball_actions[ball_action_idx];
 
                 LOG_DBG("invoking ball action [%d], layer=%d", ball_action_idx, zmk_keymap_highest_layer_active());
@@ -799,6 +799,11 @@ static int pmw3610_report_data(const struct device *dev) {
                     data->ball_action_delta_y = 0;
                 }
             }
+        }
+    } else {
+        // ボールアクション初期化
+        if (!is_ball_action && k_uptime_get() - curr_ball_time >= CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
+            is_ball_action = true;
         }
     }
     return err;
