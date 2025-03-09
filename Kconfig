@@ -173,6 +173,12 @@ config PMW3610_BALL_ACTION_TICK
     help
         Ball action tick value. Higher values require more movement to trigger a ball action.
 
+config PMW3610_BALL_ACTION_DELTA_TIME
+    int "PMW3610's required delta time a ball action"
+    default 0
+    help
+        Ball action delta time.
+
 module = PMW3610
 module-str = PMW3610
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
