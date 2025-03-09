@@ -600,7 +600,7 @@ static enum pixart_input_mode get_input_mode_for_current_layer(const struct devi
 
 // ボールアクションを一瞬だけ許可(疑似クリック)
 static int64_t curr_ball_time = 0;
-static int64_t ball_action_delta_time = 200;
+//static int64_t ball_action_delta_time = 200;
 static bool is_ball_action = true;
 
 static int pmw3610_report_data(const struct device *dev) {
@@ -723,7 +723,7 @@ static int pmw3610_report_data(const struct device *dev) {
 #endif
 
     // ボールアクション初期化
-    if (!is_ball_action && k_uptime_get() - curr_ball_time > ball_action_delta_time) {
+    if (!is_ball_action && k_uptime_get() - curr_ball_time > CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
         is_ball_action = true;
     }
 
