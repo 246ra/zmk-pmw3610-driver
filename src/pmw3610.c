@@ -571,7 +571,6 @@ static void deactivate_automouse_layer(struct k_timer *timer) {
 K_TIMER_DEFINE(automouse_layer_timer, deactivate_automouse_layer, NULL);
 #endif
 
-// レイヤーごとにボールの挙動を振り分け？
 int ball_action_idx = -1;
 static enum pixart_input_mode get_input_mode_for_current_layer(const struct device *dev) {
     const struct pixart_config *config = dev->config;
@@ -597,11 +596,6 @@ static enum pixart_input_mode get_input_mode_for_current_layer(const struct devi
     }
     return MOVE;
 }
-
-// ボールアクションを一瞬だけ許可(疑似クリック)
-static int64_t curr_ball_time = 0;
-static int64_t ball_action_delta_time = 250;
-static bool is_ball_action = true;
 
 static int pmw3610_report_data(const struct device *dev) {
     struct pixart_data *data = dev->data;
@@ -722,11 +716,6 @@ static int pmw3610_report_data(const struct device *dev) {
     }
 #endif
 
-    // ボールアクション初期化
-    if (!is_ball_action && k_uptime_get() - curr_ball_time > ball_action_delta_time) {
-        is_ball_action = true;
-    }
-
     if (x != 0 || y != 0) {
         if (input_mode == MOVE || input_mode == SNIPE) {
 #if AUTOMOUSE_LAYER > 0
@@ -756,11 +745,7 @@ static int pmw3610_report_data(const struct device *dev) {
                 data->scroll_delta_x = 0;
                 data->scroll_delta_y = 0;
             }
-        } else if (input_mode == BALL_ACTION && is_ball_action) {
-            // ボールアクションディレイ用
-            curr_ball_time = k_uptime_get();
-            is_ball_action = false;
-            
+        } else if (input_mode == BALL_ACTION) {
             data->ball_action_delta_x += x;
             data->ball_action_delta_y += y;
 
@@ -796,13 +781,9 @@ static int pmw3610_report_data(const struct device *dev) {
                     data->ball_action_delta_y = 0;
                 }
             }
-        //} else if (input_mode == BALL_ACTION && !is_ball_action) {
-        //    if(ball_action_idx != -1) {
-        //        data->ball_action_delta_x = 0;
-        //        data->ball_action_delta_y = 0;
-        //    }
         }
     }
+
     return err;
 }
 
