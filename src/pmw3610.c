@@ -761,8 +761,8 @@ static int pmw3610_report_data(const struct device *dev) {
 
             if (is_ball_action) {
                 is_ball_action = false;
-            　　data->ball_action_delta_x += x;
-            　　data->ball_action_delta_y += y;
+                data->ball_action_delta_x += x;
+                data->ball_action_delta_y += y;
 
                 const struct pixart_config *config = dev->config;
     
