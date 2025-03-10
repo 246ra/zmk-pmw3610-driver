@@ -756,8 +756,6 @@ static int pmw3610_report_data(const struct device *dev) {
                 data->scroll_delta_y = 0;
             }
         } else if (input_mode == BALL_ACTION) {
-            // ボールアクションディレイ用
-            curr_ball_time = k_uptime_get();
             
             data->ball_action_delta_x += x;
             data->ball_action_delta_y += y;
@@ -789,10 +787,14 @@ static int pmw3610_report_data(const struct device *dev) {
                 }
 
                 if(idx != -1 && is_ball_action) {
+                    // ボールアクションディレイ用
+                    curr_ball_time = k_uptime_get();
                     is_ball_action = false;
                     zmk_behavior_queue_add(&event, action_cfg.bindings[idx], true, action_cfg.tap_ms);
                     zmk_behavior_queue_add(&event, action_cfg.bindings[idx], false, action_cfg.wait_ms);
-
+                    data->ball_action_delta_x = 0;
+                    data->ball_action_delta_y = 0;
+                } else {
                     data->ball_action_delta_x = 0;
                     data->ball_action_delta_y = 0;
                 }
