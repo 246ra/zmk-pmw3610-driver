@@ -780,31 +780,28 @@ static int pmw3610_report_data(const struct device *dev) {
                 // ボールの動き(上下左右)を判定。tickを満たしていない場合NONE(-1)になる。
                 // 0>right, 1>left, 2>up, 3>down
                 int idx = -1;
-                if(abs(data->ball_action_delta_x) > action_cfg.tick && abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
-                    idx = data->ball_action_delta_x > 0 ? 0 : 1;
-                } else if(abs(data->ball_action_delta_y) > action_cfg.tick && abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
-                    idx = data->ball_action_delta_y > 0 ? 3 : 2;
+                if(abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
+                    if(abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
+                        idx = data->ball_action_delta_x > 0 ? 0 : 1;
+                    } else if(abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
+                        idx = data->ball_action_delta_y > 0 ? 3 : 2;
+                    }
                 }
 
-                if(idx != -1 && is_ball_action) {
-                    // ボールアクションディレイ用
-                    curr_ball_time = k_uptime_get();
-                    is_ball_action = false;
-                    zmk_behavior_queue_add(&event, action_cfg.bindings[idx], true, action_cfg.tap_ms);
-                    zmk_behavior_queue_add(&event, action_cfg.bindings[idx], false, action_cfg.wait_ms);
-                    data->ball_action_delta_x = 0;
-                    data->ball_action_delta_y = 0;
-                } else {
+                if(idx != -1) {
+                    if(is_ball_action) {
+                        // ボールアクションディレイ用
+                        curr_ball_time = k_uptime_get();
+                        is_ball_action = false;
+                        zmk_behavior_queue_add(&event, action_cfg.bindings[idx], true, action_cfg.tap_ms);
+                        zmk_behavior_queue_add(&event, action_cfg.bindings[idx], false, action_cfg.wait_ms);
+                    }
                     data->ball_action_delta_x = 0;
                     data->ball_action_delta_y = 0;
                 }
             }
         }
     }
-    // ボールアクション初期化
-    //if (!is_ball_action && k_uptime_get() - curr_ball_time >= CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
-    //    is_ball_action = true;
-    //}
     return err;
 }
 
