@@ -603,17 +603,32 @@ static int64_t curr_ball_time = 0;
 static bool is_ball_action = true;
 static float theta_30 = 0.577;   // 精度を上げる場合は上記数値を追記すること
 
-// ルート算出
-static float deviation = 0.01;  // 精度を上げる場合は少数以降の0を増やすこと
-static float my_sqrt(float a) {
-    a = a < 0 ? -a : a;
-    float x = a / 2;
-    while (1) {
-        float e = x * x - a;
-        float t = e < 0 ? -e : e;
-        if (t < deviation) return x;
-        x -= e / (x * 2);
-    }
+// ルート算出(連続入力されるとこの関数で動作が停止する)
+//static float deviation = 0.01;  // 精度を上げる場合は少数以降の0を増やすこと
+//static float my_sqrt(float a) {
+//    a = a < 0 ? -a : a;
+//    float x = a / 2;
+//    while (1) {
+//        float e = x * x - a;
+//        float t = e < 0 ? -e : e;
+//        if (t < deviation) return x;
+//        x -= e / (x * 2);
+//    }
+//}
+float my_sqrt(float x) {
+  int i;
+  float y, z, result;
+  if(x == 0) {
+      return 0;
+  } else {
+      y = 1;
+      for(i = 0;i <= 5;i++) {
+        z = x / y;
+        result = (y + z) / 2;
+        y = result;
+      }
+       return result;
+  }
 }
 
 static int pmw3610_report_data(const struct device *dev) {
@@ -801,9 +816,10 @@ static int pmw3610_report_data(const struct device *dev) {
                 //    }
                 //}
                 int idx = -1;
-                //float r = my_sqrt((data->ball_action_delta_x * data->ball_action_delta_x) + (data->ball_action_delta_y * data->ball_action_delta_y));
+                float r = my_sqrt((data->ball_action_delta_x * data->ball_action_delta_x) + (data->ball_action_delta_y * data->ball_action_delta_y));
                 //ボールの動きを判定（左上0、右上1、左2、右3、右下4、左下5）
-                if (abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
+                //if (abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
+                if (r > action_cfg.tick) {
                     float y_30 = abs(data->ball_action_delta_x) * theta_30;
                     if (abs(data->ball_action_delta_y) < y_30) {
                         if (data->ball_action_delta_x > 0) {
