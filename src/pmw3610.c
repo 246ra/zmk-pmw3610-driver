@@ -839,6 +839,7 @@ static int pmw3610_report_data(const struct device *dev) {
                         }
                     }
                 }
+                idx = -1;
 
                 if(idx != -1) {
                     if(is_ball_action) {
