@@ -604,14 +604,14 @@ static bool is_ball_action = true;
 static float theta_30 = 0.577;   // 精度を上げる場合は上記数値を追記すること
 
 // ルート算出
-static float E=0.01;  // 精度を上げる場合は少数以降の0を増やすこと
+static float deviation = 0.01;  // 精度を上げる場合は少数以降の0を増やすこと
 static float my_sqrt(float a) {
     a = a < 0 ? -a : a;
     float x = a / 2;
     while (1) {
         float e = x * x - a;
         float t = e < 0 ? -e : e;
-        if (t < E) return x;
+        if (t < deviation) return x;
         x -= e / (x * 2);
     }
 }
