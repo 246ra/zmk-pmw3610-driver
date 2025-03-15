@@ -816,10 +816,10 @@ static int pmw3610_report_data(const struct device *dev) {
                 //    }
                 //}
                 int idx = -1;
-                //float r = my_sqrt((data->ball_action_delta_x * data->ball_action_delta_x) + (data->ball_action_delta_y * data->ball_action_delta_y));
+                float r = my_sqrt((data->ball_action_delta_x * data->ball_action_delta_x) + (data->ball_action_delta_y * data->ball_action_delta_y));
                 //ボールの動きを判定（左上0、右上1、左2、右3、右下4、左下5）
-                if (abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
-                //if (r > action_cfg.tick) {
+                //if (abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
+                if (r > action_cfg.tick) {
                     float y_30 = abs(data->ball_action_delta_x) * theta_30;
                     if (abs(data->ball_action_delta_y) < y_30) {
                         if (data->ball_action_delta_x > 0) {
