@@ -601,6 +601,20 @@ static enum pixart_input_mode get_input_mode_for_current_layer(const struct devi
 // ボールアクションを一瞬だけ許可(疑似クリック)
 static int64_t curr_ball_time = 0;
 static bool is_ball_action = true;
+static float theta_30 = 0.577;   // 精度を上げる場合は上記数値を追記すること
+
+// ルート算出
+static float E=0.01;  // 精度を上げる場合は少数以降の0を増やすこと
+static float my_sqrt(float a) {
+    a = a < 0 ? -a : a;
+    float x = a / 2;
+    while (1) {
+        float e = x * x - a;
+        float t = e < 0 ? -e : e;
+        if (t < E) return x;
+        x -= e / (x * 2);
+    }
+}
 
 static int pmw3610_report_data(const struct device *dev) {
     struct pixart_data *data = dev->data;
@@ -773,18 +787,40 @@ static int pmw3610_report_data(const struct device *dev) {
 #if IS_ENABLED(CONFIG_ZMK_SPLIT)
                     .source = ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL,
 #endif
-
                 };
 
                 // determine which binding to invoke
                 // ボールの動き(上下左右)を判定。tickを満たしていない場合NONE(-1)になる。
-                // 0>right, 1>left, 2>up, 3>down
+                // -1>center, 0>right, 1>left, 2>up, 3>down
+                //int idx = -1;
+                //if(abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
+                //    if(abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
+                //        idx = data->ball_action_delta_x > 0 ? 0 : 1;
+                //    } else if(abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
+                //        idx = data->ball_action_delta_y > 0 ? 3 : 2;
+                //    }
+                //}
                 int idx = -1;
-                if(abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
-                    if(abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
-                        idx = data->ball_action_delta_x > 0 ? 0 : 1;
-                    } else if(abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
-                        idx = data->ball_action_delta_y > 0 ? 3 : 2;
+                float r = my_sqrt((data->ball_action_delta_x * data->ball_action_delta_x) + (data->ball_action_delta_y * data->ball_action_delta_y))
+                //ボールの動きを判定（左上0、右上1、左2、右3、右下4、左下5）
+                if (r < action_cfg.tick) {
+                    float y_30 = abs(data->ball_action_delta_x) * theta_30;
+                    if (abs(data->ball_action_delta_y) < y_30) {
+                        if (data->ball_action_delta_x > 0) {
+                            idx = 3;
+                        } else {
+                            idx = 2;
+                        }
+                    } else {
+                        if (data->ball_action_delta_y > 0 && data->ball_action_delta_x > 0) {
+                            idx = 4;
+                        } else if (data->ball_action_delta_y < 0 && data->ball_action_delta_x > 0) {
+                            idx = 1;
+                        } else if (data->ball_action_delta_y < 0 && data->ball_action_delta_x < 0) {
+                            idx = 0;
+                        } else if (data->ball_action_delta_y > 0 && data->ball_action_delta_x < 0) {
+                            idx = 5;
+                        }
                     }
                 }
 
