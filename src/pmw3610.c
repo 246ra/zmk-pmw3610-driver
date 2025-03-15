@@ -848,8 +848,8 @@ static int pmw3610_report_data(const struct device *dev) {
                         zmk_behavior_queue_add(&event, action_cfg.bindings[idx], true, action_cfg.tap_ms);
                         zmk_behavior_queue_add(&event, action_cfg.bindings[idx], false, action_cfg.wait_ms);
                     }
-                    data->ball_action_delta_x = 0;
-                    data->ball_action_delta_y = 0;
+                    //data->ball_action_delta_x = 0;
+                    //data->ball_action_delta_y = 0;
                 }
             }
         }
