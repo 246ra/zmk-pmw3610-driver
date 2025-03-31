@@ -797,7 +797,7 @@ static int pmw3610_report_data(const struct device *dev) {
                 float r = my_sqrt((data->ball_action_delta_x * data->ball_action_delta_x) + (data->ball_action_delta_y * data->ball_action_delta_y));
                 if (r > action_cfg.tick) {
                     float y_30 = abs(data->ball_action_delta_x) * tangent_30;
-                    // Determines direction of ball action(0: up left, 1: up right, 2: left, 3: right, 4: down right, 5: down left)
+                    // Determines direction of ball action(0: up left, 1: up right, 2: left, 3: right, 4: down left, 5: down right)
                     if (abs(data->ball_action_delta_y) < y_30) {
                         if (data->ball_action_delta_x > 0) {
                             idx = 3;    // right
@@ -806,13 +806,13 @@ static int pmw3610_report_data(const struct device *dev) {
                         }
                     } else {
                         if (data->ball_action_delta_y > 0 && data->ball_action_delta_x > 0) {
-                            idx = 4;    // down right
+                            idx = 5;    // down left
                         } else if (data->ball_action_delta_y < 0 && data->ball_action_delta_x > 0) {
                             idx = 1;    // up right
                         } else if (data->ball_action_delta_y < 0 && data->ball_action_delta_x < 0) {
                             idx = 0;    // up left
                         } else if (data->ball_action_delta_y > 0 && data->ball_action_delta_x < 0) {
-                            idx = 5;    // down left
+                            idx = 4;    // down right
                         }
                     }
                 }
