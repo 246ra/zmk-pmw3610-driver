@@ -571,7 +571,6 @@ static void deactivate_automouse_layer(struct k_timer *timer) {
 K_TIMER_DEFINE(automouse_layer_timer, deactivate_automouse_layer, NULL);
 #endif
 
-// レイヤーごとにボールの挙動を振り分け？
 int ball_action_idx = -1;
 static enum pixart_input_mode get_input_mode_for_current_layer(const struct device *dev) {
     const struct pixart_config *config = dev->config;
@@ -598,23 +597,12 @@ static enum pixart_input_mode get_input_mode_for_current_layer(const struct devi
     return MOVE;
 }
 
-// ボールアクションを一瞬だけ許可(疑似クリック)
+// Allows momentary ball action(pseudo key input)
 static int64_t curr_ball_time = 0;
 static bool is_ball_action = true;
-static float theta_30 = 0.577;   // 精度を上げる場合は上記数値を追記すること
+static float tangent_30 = 0.577;   // Add a few if you want to increase accuracy
 
-// ルート算出(連続入力されるとこの関数で動作が停止する)
-//static float deviation = 0.01;  // 精度を上げる場合は少数以降の0を増やすこと
-//static float my_sqrt(float a) {
-//    a = a < 0 ? -a : a;
-//    float x = a / 2;
-//    while (1) {
-//        float e = x * x - a;
-//        float t = e < 0 ? -e : e;
-//        if (t < deviation) return x;
-//        x -= e / (x * 2);
-//    }
-//}
+// Route calculation
 float my_sqrt(float x) {
   int i;
   float y, z, result;
@@ -750,7 +738,7 @@ static int pmw3610_report_data(const struct device *dev) {
     }
 #endif
 
-    // ボールアクション初期化
+    // Ball action initialization
     if (!is_ball_action && k_uptime_get() - curr_ball_time >= CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
           is_ball_action = true;
     }
@@ -758,7 +746,6 @@ static int pmw3610_report_data(const struct device *dev) {
     if (x != 0 || y != 0) {
         if (input_mode == MOVE || input_mode == SNIPE) {
 #if AUTOMOUSE_LAYER > 0
-            // トラックボールの動きの大きさを計算
             int16_t movement_size = abs(x) + abs(y);
             if (input_mode == MOVE &&
                 (automouse_triggered || zmk_keymap_highest_layer_active() != AUTOMOUSE_LAYER) &&
@@ -805,44 +792,34 @@ static int pmw3610_report_data(const struct device *dev) {
                 };
 
                 // determine which binding to invoke
-                // ボールの動き(上下左右)を判定。tickを満たしていない場合NONE(-1)になる。
-                // -1>center, 0>right, 1>left, 2>up, 3>down
-                //int idx = -1;
-                //if(abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
-                //    if(abs(data->ball_action_delta_x) > abs(data->ball_action_delta_y)) {
-                //        idx = data->ball_action_delta_x > 0 ? 0 : 1;
-                //    } else if(abs(data->ball_action_delta_x) < abs(data->ball_action_delta_y)) {
-                //        idx = data->ball_action_delta_y > 0 ? 3 : 2;
-                //    }
-                //}
-                int idx = -1;
+                int idx = -1;           // none
+                // radial distance
                 float r = my_sqrt((data->ball_action_delta_x * data->ball_action_delta_x) + (data->ball_action_delta_y * data->ball_action_delta_y));
-                //ボールの動きを判定（左上0、右上1、左2、右3、右下4、左下5）
-                //if (abs(data->ball_action_delta_x) > action_cfg.tick || abs(data->ball_action_delta_y) > action_cfg.tick) {
                 if (r > action_cfg.tick) {
-                    float y_30 = abs(data->ball_action_delta_x) * theta_30;
+                    float y_30 = abs(data->ball_action_delta_x) * tangent_30;
+                    // Determines direction of ball action(0: up left, 1: up right, 2: left, 3: right, 4: down right, 5: down left)
                     if (abs(data->ball_action_delta_y) < y_30) {
                         if (data->ball_action_delta_x > 0) {
-                            idx = 3;
+                            idx = 3;    // right
                         } else {
-                            idx = 2;
+                            idx = 2;    // left
                         }
                     } else {
                         if (data->ball_action_delta_y > 0 && data->ball_action_delta_x > 0) {
-                            idx = 4;
+                            idx = 4;    // down right
                         } else if (data->ball_action_delta_y < 0 && data->ball_action_delta_x > 0) {
-                            idx = 1;
+                            idx = 1;    // up right
                         } else if (data->ball_action_delta_y < 0 && data->ball_action_delta_x < 0) {
-                            idx = 0;
+                            idx = 0;    // up left
                         } else if (data->ball_action_delta_y > 0 && data->ball_action_delta_x < 0) {
-                            idx = 5;
+                            idx = 5;    // down left
                         }
                     }
                 }
 
                 if(idx != -1) {
+                    // Execute ball action
                     if(is_ball_action) {
-                        // ボールアクションディレイ用
                         curr_ball_time = k_uptime_get();
                         is_ball_action = false;
                         zmk_behavior_queue_add(&event, action_cfg.bindings[idx], true, action_cfg.tap_ms);
