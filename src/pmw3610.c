@@ -739,9 +739,9 @@ static int pmw3610_report_data(const struct device *dev) {
 #endif
 
     // Ball action initialization
-    if (!is_ball_action && k_uptime_get() - curr_ball_time >= CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
-          is_ball_action = true;
-    }
+    //if (!is_ball_action && k_uptime_get() - curr_ball_time >= CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
+    //      is_ball_action = true;
+    //}
     
     if (x != 0 || y != 0) {
         if (input_mode == MOVE || input_mode == SNIPE) {
@@ -830,6 +830,8 @@ static int pmw3610_report_data(const struct device *dev) {
                 }
             }
         }
+    } else if (!is_ball_action && k_uptime_get() - curr_ball_time >= CONFIG_PMW3610_BALL_ACTION_DELTA_TIME) {
+          is_ball_action = true;
     }
     return err;
 }
